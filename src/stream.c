@@ -439,6 +439,110 @@ PHP_FUNCTION(soundio_ring_buffer_clear)
 	soundio_ring_buffer_clear(rb);
 }
 
+/*
+ * SoundIoRingBufferBridge: callbacks libsoundio's audio thread calls, so they touch no PHP.
+ * The ring at userdata holds interleaved frames in the stream's format and layout; its memory
+ * is mirrored, so fill_count bytes from read_ptr and free_count bytes from write_ptr are contiguous.
+ */
+static void libsoundio_bridge_write(struct SoundIoOutStream *outstream, int frame_count_min, int frame_count_max)
+{
+	struct SoundIoRingBuffer *ring = outstream->userdata;
+	int frame_bytes = outstream->bytes_per_frame;
+	int sample_bytes = outstream->bytes_per_sample;
+	int channels = outstream->layout.channel_count;
+	int held = ring != NULL && frame_bytes > 0 ? soundio_ring_buffer_fill_count(ring) / frame_bytes : 0;
+	int real = held < frame_count_max ? held : frame_count_max;
+	int total = real > frame_count_min ? real : frame_count_min;
+	const char *source = real > 0 ? soundio_ring_buffer_read_ptr(ring) : NULL;
+	int done = 0;
+
+	while (done < total) {
+		struct SoundIoChannelArea *areas;
+		int count = total - done;
+
+		if (soundio_outstream_begin_write(outstream, &areas, &count) != SoundIoErrorNone || count <= 0) {
+			break;
+		}
+		for (int frame = 0; frame < count; frame++) {
+			int at = done + frame;
+
+			for (int channel = 0; channel < channels; channel++) {
+				char *to = areas[channel].ptr + (size_t) areas[channel].step * (size_t) frame;
+
+				if (at < real) {
+					memcpy(to, source + (size_t) at * (size_t) frame_bytes + (size_t) channel * (size_t) sample_bytes, (size_t) sample_bytes);
+				} else {
+					memset(to, 0, (size_t) sample_bytes);
+				}
+			}
+		}
+		if (soundio_outstream_end_write(outstream) != SoundIoErrorNone) {
+			done += count;
+			break;
+		}
+		done += count;
+	}
+	if (real > 0) {
+		soundio_ring_buffer_advance_read_ptr(ring, (done < real ? done : real) * frame_bytes);
+	}
+}
+
+static void libsoundio_bridge_read(struct SoundIoInStream *instream, int frame_count_min, int frame_count_max)
+{
+	struct SoundIoRingBuffer *ring = instream->userdata;
+	int frame_bytes = instream->bytes_per_frame;
+	int sample_bytes = instream->bytes_per_sample;
+	int channels = instream->layout.channel_count;
+	int room = ring != NULL && frame_bytes > 0 ? soundio_ring_buffer_free_count(ring) / frame_bytes : 0;
+	char *target = room > 0 ? soundio_ring_buffer_write_ptr(ring) : NULL;
+	int stored = 0;
+	int left = frame_count_max;
+
+	(void) frame_count_min;
+	while (left > 0) {
+		struct SoundIoChannelArea *areas;
+		int count = left;
+
+		if (soundio_instream_begin_read(instream, &areas, &count) != SoundIoErrorNone || count <= 0) {
+			break;
+		}
+		int keep = room - stored < count ? room - stored : count;
+
+		for (int frame = 0; frame < keep; frame++) {
+			char *to = target + (size_t) (stored + frame) * (size_t) frame_bytes;
+
+			for (int channel = 0; channel < channels; channel++) {
+				if (areas == NULL) {
+					/* A hole in the capture: libsoundio gives no areas, the frames are silence. */
+					memset(to + (size_t) channel * (size_t) sample_bytes, 0, (size_t) sample_bytes);
+				} else {
+					memcpy(to + (size_t) channel * (size_t) sample_bytes, areas[channel].ptr + (size_t) areas[channel].step * (size_t) frame, (size_t) sample_bytes);
+				}
+			}
+		}
+		stored += keep;
+		left -= count;
+		if (soundio_instream_end_read(instream) != SoundIoErrorNone) {
+			break;
+		}
+	}
+	if (stored > 0) {
+		soundio_ring_buffer_advance_write_ptr(ring, stored * frame_bytes);
+	}
+}
+
+ZEND_METHOD(SoundIoRingBufferBridge, writeCallback)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+	RETURN_LONG((zend_long) (uintptr_t) libsoundio_bridge_write);
+}
+
+ZEND_METHOD(SoundIoRingBufferBridge, readCallback)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+	RETURN_LONG((zend_long) (uintptr_t) libsoundio_bridge_read);
+}
+
 void libsoundio_register_stream(void)
 {
 	zend_register_functions(NULL, ext_functions, NULL, MODULE_PERSISTENT);

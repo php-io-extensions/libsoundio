@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: bb3074c7dd587af3a45ecdac541c2c863b8241d6 */
+ * Stub hash: caa38fa1211bc647a6987ef440850b710b1d0c6e */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SoundIo___construct, 0, 0, 0)
 ZEND_END_ARG_INFO()
@@ -35,6 +35,10 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_SoundIoRingBuffer_fromPointer arginfo_class_SoundIo_fromPointer
 
+#define arginfo_class_SoundIoRingBufferBridge_writeCallback arginfo_class_SoundIo_pointer
+
+#define arginfo_class_SoundIoRingBufferBridge_readCallback arginfo_class_SoundIo_pointer
+
 ZEND_METHOD(SoundIo, __construct);
 ZEND_METHOD(SoundIo, pointer);
 ZEND_METHOD(SoundIo, fromPointer);
@@ -50,6 +54,8 @@ ZEND_METHOD(SoundIoInStream, fromPointer);
 ZEND_METHOD(SoundIoRingBuffer, __construct);
 ZEND_METHOD(SoundIoRingBuffer, pointer);
 ZEND_METHOD(SoundIoRingBuffer, fromPointer);
+ZEND_METHOD(SoundIoRingBufferBridge, writeCallback);
+ZEND_METHOD(SoundIoRingBufferBridge, readCallback);
 
 static const zend_function_entry class_SoundIo_methods[] = {
 	ZEND_ME(SoundIo, __construct, arginfo_class_SoundIo___construct, ZEND_ACC_PRIVATE)
@@ -83,6 +89,12 @@ static const zend_function_entry class_SoundIoRingBuffer_methods[] = {
 	ZEND_ME(SoundIoRingBuffer, __construct, arginfo_class_SoundIoRingBuffer___construct, ZEND_ACC_PRIVATE)
 	ZEND_ME(SoundIoRingBuffer, pointer, arginfo_class_SoundIoRingBuffer_pointer, ZEND_ACC_PUBLIC)
 	ZEND_ME(SoundIoRingBuffer, fromPointer, arginfo_class_SoundIoRingBuffer_fromPointer, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_FE_END
+};
+
+static const zend_function_entry class_SoundIoRingBufferBridge_methods[] = {
+	ZEND_ME(SoundIoRingBufferBridge, writeCallback, arginfo_class_SoundIoRingBufferBridge_writeCallback, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(SoundIoRingBufferBridge, readCallback, arginfo_class_SoundIoRingBufferBridge_readCallback, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_FE_END
 };
 
@@ -482,6 +494,16 @@ static zend_class_entry *register_class_SoundIoRingBuffer(void)
 
 	INIT_CLASS_ENTRY(ce, "SoundIoRingBuffer", class_SoundIoRingBuffer_methods);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NOT_SERIALIZABLE);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_SoundIoRingBufferBridge(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "SoundIoRingBufferBridge", class_SoundIoRingBufferBridge_methods);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
 
 	return class_entry;
 }

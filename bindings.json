@@ -1,29 +1,12 @@
 {
     "symbols": {},
     "glue": {
-        "*": {
-            "methods": [
-                "pointer",
-                "fromPointer"
-            ],
-            "forwards": "address hand-off on every handle class"
-        },
-        "SoundIo": {
-            "methods": [],
-            "forwards": "struct SoundIo's public fields as properties, read from and written to the native struct on each access; app_name's string held while libsoundio points into it"
-        },
-        "SoundIoDevice": {
-            "methods": [],
-            "forwards": "struct SoundIoDevice's public fields as readonly properties, read from the native struct on each access"
-        },
-        "SoundIoOutStream": {
-            "methods": [],
-            "forwards": "struct SoundIoOutStream's public fields as properties, read from and written to the native struct on each access; name and layout.name held while libsoundio points into them"
-        },
-        "SoundIoInStream": {
-            "methods": [],
-            "forwards": "struct SoundIoInStream's public fields as properties, read from and written to the native struct on each access; name and layout.name held while libsoundio points into them"
-        }
+        "*": {"methods": ["pointer", "fromPointer"], "forwards": "address hand-off on every handle class"},
+        "SoundIo": {"methods": [], "forwards": "struct SoundIo's public fields as properties, read from and written to the native struct on each access; app_name's string held while libsoundio points into it"},
+        "SoundIoDevice": {"methods": [], "forwards": "struct SoundIoDevice's public fields as readonly properties, read from the native struct on each access"},
+        "SoundIoOutStream": {"methods": [], "forwards": "struct SoundIoOutStream's public fields as properties, read from and written to the native struct on each access; name and layout.name held while libsoundio points into them"},
+        "SoundIoInStream": {"methods": [], "forwards": "struct SoundIoInStream's public fields as properties, read from and written to the native struct on each access; name and layout.name held while libsoundio points into them"},
+        "SoundIoRingBufferBridge": {"methods": ["writeCallback", "readCallback"], "forwards": "addresses of native write_callback / read_callback functions that move frames between a stream and the SoundIoRingBuffer at its userdata, filling silence when the ring runs dry; libsoundio calls them on its audio thread, where PHP cannot run"}
     },
     "helpers": {
         "marshal": [
@@ -35,43 +18,14 @@
         "translate": []
     },
     "sites": {
-        "libsoundio-released-handle": {
-            "kind": "refusal",
-            "outcome": 1,
-            "probe": "tests/Probes/ReleasedHandleTest.php"
-        },
-        "libsoundio-null-write-callback": {
-            "kind": "refusal",
-            "outcome": 2,
-            "probe": "tests/Probes/NullCallbackTest.php"
-        },
-        "libsoundio-null-read-callback": {
-            "kind": "refusal",
-            "outcome": 2,
-            "probe": "tests/Probes/NullCallbackTest.php"
-        },
-        "libsoundio-list-count": {
-            "kind": "refusal",
-            "outcome": 1,
-            "probe": "tests/Probes/LayoutTest.php"
-        },
-        "libsoundio-builtin-index": {
-            "kind": "refusal",
-            "outcome": 1,
-            "probe": "tests/Probes/LayoutTest.php"
-        },
-        "libsoundio-set-volume-unsupported": {
-            "kind": "refusal",
-            "outcome": 2,
-            "probe": "tests/Probes/SetVolumeTest.php"
-        }
+        "libsoundio-released-handle": {"kind": "refusal", "outcome": 1, "probe": "tests/Probes/ReleasedHandleTest.php"},
+        "libsoundio-null-write-callback": {"kind": "refusal", "outcome": 2, "probe": "tests/Probes/NullCallbackTest.php"},
+        "libsoundio-null-read-callback": {"kind": "refusal", "outcome": 2, "probe": "tests/Probes/NullCallbackTest.php"},
+        "libsoundio-list-count": {"kind": "refusal", "outcome": 1, "probe": "tests/Probes/LayoutTest.php"},
+        "libsoundio-builtin-index": {"kind": "refusal", "outcome": 1, "probe": "tests/Probes/LayoutTest.php"},
+        "libsoundio-set-volume-unsupported": {"kind": "refusal", "outcome": 2, "probe": "tests/Probes/SetVolumeTest.php"}
     },
     "typemap": {
-        "SoundIoChannelLayout*": [
-            "array"
-        ],
-        "char*": [
-            "int"
-        ]
+        "SoundIoChannelLayout*": ["array"], "char*": ["int"]
     }
 }

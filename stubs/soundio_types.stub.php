@@ -220,6 +220,27 @@ final class SoundIoRingBuffer
     public static function fromPointer(int $pointer): ?static {}
 }
 
+/**
+ * Native callbacks that join a stream to a SoundIoRingBuffer, for the stream's
+ * address fields. Set the stream's userdata to the ring buffer's pointer().
+ * The ring holds interleaved frames in the stream's format and layout.
+ */
+final class SoundIoRingBufferBridge
+{
+    /**
+     * A write_callback: each call takes up to frame_count_max frames from the
+     * ring at userdata, and writes silence (zero bytes) for whatever part of
+     * frame_count_min the ring does not hold.
+     */
+    public static function writeCallback(): int {}
+
+    /**
+     * A read_callback: each call puts the frames the device captured into the
+     * ring at userdata, as many as it has room for, and drops the rest.
+     */
+    public static function readCallback(): int {}
+}
+
 /** struct SoundIoChannelLayout, zeroed as C's {0}. $channels holds channel_count SoundIoChannelId values, at most SOUNDIO_MAX_CHANNELS. */
 final class SoundIoChannelLayout
 {

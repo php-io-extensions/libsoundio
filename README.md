@@ -60,7 +60,7 @@ libsoundio calls most of its callbacks on its own threads. PHP may only run on t
 | `SoundIoOutStream.write_callback`, `.underflow_callback`, `.error_callback` | the realtime audio thread | address |
 | `SoundIoInStream.read_callback`, `.overflow_callback`, `.error_callback` | the realtime audio thread | address |
 
-So ext-libsoundio on its own opens contexts, enumerates devices, and creates, opens and starts streams, and moves bytes through the ring buffer, but plays and records nothing: the audio thread's `write_callback` / `read_callback` has to be native code whose address another extension supplies. libsoundio's own design bridges them with a `SoundIoRingBuffer`, which is bound 1:1.
+The audio thread's `write_callback` / `read_callback` has to be native code. libsoundio's own design bridges them with a `SoundIoRingBuffer`, which is bound 1:1, and the extension ships that bridge: set a stream's `userdata` to the ring's `pointer()` and its callback to `SoundIoRingBufferBridge::writeCallback()` (or `readCallback()` for an instream). The ring holds interleaved frames in the stream's format; an empty ring plays silence.
 
 `on_devices_change` and `on_backend_disconnect` are called as `fn(SoundIo $soundio): void` and `fn(SoundIo $soundio, int $err): void`. They run only inside `soundio_flush_events()` / `soundio_wait_events()` on the PHP thread; one fired anywhere else never enters PHP.
 

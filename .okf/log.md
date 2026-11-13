@@ -1,5 +1,9 @@
 # Log
 
+## 2026-11-12
+
+* **Glue `SoundIoRingBufferBridge`** (Angel added the bindings.json entry): `writeCallback()` / `readCallback()`, native ring-buffer callbacks for a stream's `write_callback` / `read_callback`, ring at `userdata`. `tests/RingBufferBridgeTest.php` fills a ring from a dummy instream and drains it through a dummy outstream. Mac NTS, ZTS and zhp: 65 passed, 9 probes skipped. [handles and callbacks](architecture/handles-and-callbacks.md)
+
 ## 2026-11-11
 
 * **Green: Mac NTS and ZTS, Pi NTS and ZTS.** Normal builds 63 passed, 9 probes skipped; probe builds 72 / 72 on the Mac, 71 + the macOS-only `best_matching` case skipped on the Pi. Debian's libsoundio keeps `assert()`: the `libsoundio-builtin-index` off-run aborts (SIGABRT) there instead of over-reading, so that probe accepts SIGABRT. Copy to the Pi with `COPYFILE_DISABLE=1`, or macOS tar ships `._*` files that break gen_stub.

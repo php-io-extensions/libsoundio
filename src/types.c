@@ -507,6 +507,7 @@ void libsoundio_register_types(void)
 	libsoundio_field_handlers(libsoundio_ce_SoundIoInStream, &libsoundio_instream_handlers, libsoundio_instream_read, libsoundio_instream_write);
 	libsoundio_ce_SoundIoRingBuffer = register_class_SoundIoRingBuffer();
 	libsoundio_handle_setup(libsoundio_ce_SoundIoRingBuffer);
+	register_class_SoundIoRingBufferBridge();
 
 	libsoundio_ce_SoundIoChannelLayout = register_class_SoundIoChannelLayout();
 	libsoundio_ce_SoundIoSampleRateRange = register_class_SoundIoSampleRateRange();
